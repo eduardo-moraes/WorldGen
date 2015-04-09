@@ -76,7 +76,7 @@ public class VertexStreamer {
 		}
 
 		// Create a mesh using the vertex and triangle sets we created
-		return new Mesh(vertSet, triSet, MeshMode.CENTER);
+		return new Mesh(vertSet, triSet, MeshMode.TOPLEFT);
 	}
 	
 	public static Mesh buildMesh(ElevationMap elevs, double pw, double ph) {
