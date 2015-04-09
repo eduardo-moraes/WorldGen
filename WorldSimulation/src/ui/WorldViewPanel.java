@@ -1,8 +1,8 @@
 package ui;
 
-//import utilities.graphics.Camera;
-//import world.World;
-/*
+import utilities.graphics.Camera;
+import world.World;
+
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
@@ -11,9 +11,9 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.FPSAnimator;
-*/
-public class WorldViewPanel {// extends GLJPanel implements GLEventListener {
-/*	
+
+public class WorldViewPanel extends GLJPanel implements GLEventListener {
+	
 	//---Object Data
 	World mWorld;
 	Camera mCamera;
@@ -158,7 +158,6 @@ public class WorldViewPanel {// extends GLJPanel implements GLEventListener {
 	@Override
 	public void reshape(GLAutoDrawable drawable, int arg1, int arg2, int arg3, int arg4) {
 		// TODO Auto-generated method stub
-		
+
 	}
-*/
 }

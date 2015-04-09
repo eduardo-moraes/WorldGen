@@ -9,10 +9,10 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-//import world.World;
+import world.World;
 
-public class RegionPanel {//extends JPanel implements ActionListener {
-/*
+public class RegionPanel extends JPanel implements ActionListener {
+
 	//---Object Data
 	World mWorld;
 	JLabel regionLabel;
@@ -82,5 +82,4 @@ public class RegionPanel {//extends JPanel implements ActionListener {
 			next();
 		}
 	}
-	*/
 }

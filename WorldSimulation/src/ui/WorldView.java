@@ -10,16 +10,16 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-//import com.jogamp.opengl.*;
-//import com.jogamp.opengl.awt.GLCanvas;
-//import com.jogamp.opengl.awt.GLJPanel;
-//import com.jogamp.opengl.util.*;
+import com.jogamp.opengl.*;
+import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.util.*;
 
-//import utilities.graphics.Camera;
-//import world.World;
+import utilities.graphics.Camera;
+import world.World;
 
-public class WorldView {// implements ActionListener {
-/*
+public class WorldView implements ActionListener {
+
 	//---Object Data
 	JFrame mFrame;
 	WorldViewPanel mViewPanel;
@@ -106,7 +106,7 @@ public class WorldView {// implements ActionListener {
 		buttonPanel.add(sharpButton);
 		buttonPanel.add(edgeButton);
 		*/
-/*
+		
 		// Set frame as visible
 		mFrame.setVisible(true);
 	}
@@ -144,6 +144,5 @@ public class WorldView {// implements ActionListener {
 			mWorld.edgeDetectMap();
 		}
 		*/
-//	}
-	
+	}
 }
