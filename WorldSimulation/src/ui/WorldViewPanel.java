@@ -71,7 +71,7 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener {
 		//
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
-		double scaleFactor = 0.1;
+		double scaleFactor = 0.01;
 		//
 		if (mMode == 0) {
 			gl.glScaled(scaleFactor, scaleFactor, scaleFactor);
@@ -80,12 +80,13 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener {
 			gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
 		} else {
 			//
-			gl.glScaled(scaleFactor, scaleFactor, scaleFactor);
+			//gl.glScaled(scaleFactor, scaleFactor, scaleFactor);
 			//gl.glRotated(45, 0, 0, 1);
 			//gl.glRotated(-45, 1, -1, 0);
 			
 			//gl.glRotated(angle, 1, 1, 1);
 			
+			/*
 			gl.glColor3d(0.0, 0.0, 1.0);
 			gl.glBegin(GL2.GL_POLYGON);
 			gl.glVertex3d(-1, -1, -0.01);
@@ -93,7 +94,8 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener {
 			gl.glVertex3d(1, 1, -0.01);
 			gl.glVertex3d(1, -1, -0.01);
 			gl.glEnd();
-
+			*/
+			
 			gl.glColor3d(1, 0, 0);
 			gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
 			mWorld.render(drawable, mCamera);

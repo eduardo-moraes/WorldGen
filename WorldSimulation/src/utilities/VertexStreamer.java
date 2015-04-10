@@ -20,9 +20,11 @@ public class VertexStreamer {
 
 	//---Methods
 	
-	public static Mesh buildMeshTest(ElevationMap elevs, int pw, int ph) {
+	public static Mesh buildMeshMax(ElevationMap elevs) {
 		int w = elevs.getWidth();
 		int h = elevs.getHeight();
+		int pw = w;
+		int ph = h;
 		double squareSize = 1.0;
 		double realWidth  = squareSize*w;
 		double realHeight = squareSize*h;
@@ -32,7 +34,7 @@ public class VertexStreamer {
 		Set<Triangle> triSet = new LinkedHashSet<Triangle>();
 
 		// Create temporary array to hold the vertices in the proper relative order
-		Vertex[][] verts = new Vertex[w + 1][h + 1];
+		Vertex[][] verts = new Vertex[pw + 1][ph + 1];
 		
 		// Calculate the step size between vertices in x and y
 		double dx = realWidth / (double) (w);
@@ -77,6 +79,91 @@ public class VertexStreamer {
 
 		// Create a mesh using the vertex and triangle sets we created
 		return new Mesh(vertSet, triSet, MeshMode.TOPLEFT);
+	}
+	
+	public static Mesh buildMeshMin(ElevationMap elevs, double portionW, double portionH) {
+		//
+		final int FIXED_PIXEL_SIZE = 10;
+		int screenW = 200;
+		int screenH = 200;
+		double vertDX = 2.0 * ((double)(FIXED_PIXEL_SIZE) / (double)(screenW));
+		double vertDY = 2.0 * ((double)(FIXED_PIXEL_SIZE) / (double)(screenH));
+		int vertsX = (screenW / FIXED_PIXEL_SIZE) + 1;
+		int vertsY = (screenH / FIXED_PIXEL_SIZE) + 1;
+		double worldW = 1000;
+		double worldH = 1000;
+		//double portionW = 200;
+		//double portionH = 200;
+		double portionX = 35;
+		double portionY = 35;
+		double minFeatureSizeX = portionW * ((double)(FIXED_PIXEL_SIZE) / (double)(screenW));
+		double minFeatureSizeY = portionH * ((double)(FIXED_PIXEL_SIZE) / (double)(screenW));
+		double featureRadiusX = minFeatureSizeX / 2.0;
+		double featureRadiusY = minFeatureSizeY / 2.0;
+		
+		Set<Vertex> vertSet = new LinkedHashSet<Vertex>();
+		Set<Triangle> triSet = new LinkedHashSet<Triangle>();
+
+		Vertex[][] verts = new Vertex[vertsX][vertsY];
+		
+		for (int x = 0; x < verts.length; ++x) {
+			for (int y = 0; y < verts[0].length; ++y) {
+				double vertPosX = x * minFeatureSizeX;
+				double vertPosY = y * minFeatureSizeY;
+				
+				int leftIndex = (int)Math.floor(vertPosX + portionX - featureRadiusX);
+				int rightIndex = (int)Math.ceil(vertPosX + portionX + featureRadiusX);
+				int topIndex = (int)Math.floor(vertPosY + portionY - featureRadiusY);
+				int bottomIndex = (int)Math.ceil(vertPosY + portionY + featureRadiusY);
+				int neighborsX = rightIndex-leftIndex+1;
+				int neighborsY = bottomIndex-topIndex+1;
+				
+				double[][] neighbors = new double[neighborsX][neighborsY];
+				for (int i = 0; i < neighborsX; ++i) {
+					for (int j = 0; j < neighborsY; ++j) {
+						neighbors[i][j] = elevs.getElev(leftIndex+i, topIndex+j);
+					}
+				}
+				double vertPosZ = 0.0;
+				double sum = 0.0;
+				for (int i = 0; i < neighborsX; ++i) {
+					for (int j = 0; j < neighborsY; ++j) {
+						double distX = (leftIndex+i+0.5);
+						double distY = (topIndex+j+0.5);
+						double inverseDist = 1 / (distX*distX + distY*distY);
+						vertPosZ += neighbors[i][j]*inverseDist;
+						sum += inverseDist;
+					}
+				}
+				vertPosZ /= sum;
+				
+				verts[x][y] = new Vertex(vertPosX, -vertPosY, vertPosZ);
+				vertSet.add(verts[x][y]);
+			}
+		}
+		
+		for (int x = 0; x < verts.length-1; ++x) {
+			for (int y = 0; y < verts[0].length-1; ++y) {
+				// Create 2 triangles forming a square using the 4 neighboring vertices
+				Triangle temp1 = new Triangle(verts[x][y], verts[x][y + 1], verts[x + 1][y + 1]);
+				Triangle temp2 = new Triangle(verts[x][y], verts[x + 1][y + 1], verts[x + 1][y]);
+				// Add both triangles to the set
+				triSet.add(temp1);
+				triSet.add(temp2);
+			}
+		}
+		
+		return new Mesh(vertSet, triSet, MeshMode.TOPLEFT);
+	}
+	
+	public int getH(double x, double y, double fSize) {
+		double radius = fSize / 2.0;
+		double gX = x - 0.5;
+		double gY = y - 0.5;
+		int discreteRadius = (int)Math.ceil(x + radius);
+		int top = (int)gY;
+		
+		return 0;
 	}
 	
 	public static Mesh buildMesh(ElevationMap elevs, double pw, double ph) {
