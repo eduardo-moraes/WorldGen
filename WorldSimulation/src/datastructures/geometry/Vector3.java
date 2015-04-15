@@ -1,60 +1,57 @@
-package utilities.arrays;
+package datastructures.geometry;
 
-import utilities.geometry.Point;
 
 public class Vector3 {
 
 	//---Object Data
-	double x, y, z;
+	public final double x, y, z;
+	public final double length;
 
 	// ---Constructors
 	public Vector3() {
 		this(0, 0, 0);
 	}
 	
+	public Vector3(Point start, Point end) {
+		this((end.x - start.x), (end.y - start.y), (end.z - start.z));
+	}
+	
 	public Vector3(double x, double y, double z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
-	}
-	
-	public Vector3(Point start, Point end) {
-		this.x = (end.getX() - start.getX());
-		this.y = (end.getY() - start.getY());
-		this.z = (end.getZ() - start.getZ());
+		this.length = Math.sqrt((x*x) + (y*y) + (z*z));
 	}
 
 	// ---Methods
 	
-	public double getX() { return this.x; }
-
-	public double getY() { return this.y; }
-
-	public double getZ() { return this.z; }
-	
-	public void add(Vector3 other) {
-		this.x += other.x;
-		this.y += other.y;
-		this.z += other.z;
+	public Vector3 add(Vector3 other) {
+		// Add each dimension to get the new vector
+		double newX = this.x + other.x;
+		double newY = this.y + other.y;
+		double newZ = this.z + other.z;
+		return new Vector3(newX, newY, newZ);
 	}
 	
-	public void multiply(double scalar) {
-		this.x *= scalar;
-		this.y *= scalar;
-		this.z *= scalar;
+	public Vector3 multiply(double scalar) {
+		// Multiply each dimension by the scalar
+		double newX = this.x*scalar;
+		double newY = this.y*scalar;
+		double newZ = this.z*scalar;
+		return new Vector3(newX, newY, newZ);
 	}
 	
 	public Vector3 cross(Vector3 other) {
 		// 
-		double newX, newY, newZ;
-		
-		// 
-		newX = (this.y*other.z - other.y*this.z);
-		newY = (this.z*other.x - other.z*this.x);
-		newZ = (this.x*other.y - other.x*this.y);
-		
-		// 
+		double newX = (this.y*other.z - other.y*this.z);
+		double newY = (this.z*other.x - other.z*this.x);
+		double newZ = (this.x*other.y - other.x*this.y);
 		return new Vector3(newX, newY, newZ);
+	}
+	
+	public Vector3 normalized() {
+		if (Math.abs(this.length-1.0) < 0.0001) return this;
+		else return new Vector3(x/length, y/length, z/length);
 	}
 	
 	@Override
@@ -81,5 +78,10 @@ public class Vector3 {
 	public int hashCode() {
 		// Calculate hash code using a unique prime times each dimension (cast to int)
 		return (int) (47 * x + 31 * y + 19 * z);
+	}
+	
+	@Override
+	public String toString() {
+		return this.x + ", " + this.y + ", " + this.z;
 	}
 }

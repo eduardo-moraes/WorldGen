@@ -1,5 +1,6 @@
 package ui;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -16,11 +17,15 @@ public class RegionPanel extends JPanel implements ActionListener {
 	//---Object Data
 	World mWorld;
 	JLabel regionLabel;
+	JLabel selectionLabel;
 
 	//---Constructors
-	public RegionPanel(World world) {
+	public RegionPanel(World world, int width, int height) {
 		// 
 		this.mWorld = world;
+		this.setMaximumSize(new Dimension(width, height));
+		this.setMinimumSize(new Dimension(width, height));
+		this.setPreferredSize(new Dimension(width, height));
 		
 		// 
 		JButton prevRegion = new JButton("Previous");
@@ -39,13 +44,17 @@ public class RegionPanel extends JPanel implements ActionListener {
 		nextRegion.setActionCommand("next");
 		nextRegion.addActionListener(this);
 		
+		this.selectionLabel = new JLabel("NO SELECTION");
+		this.selectionLabel.setAlignmentX(CENTER_ALIGNMENT);
+		
 		// 
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		// Add each component to panel
 		this.add(Box.createVerticalGlue());
-		this.add(prevRegion);
-		this.add(regionLabel);
-		this.add(nextRegion);
+		//this.add(prevRegion);
+		//this.add(regionLabel);
+		//this.add(nextRegion);
+		this.add(selectionLabel);
 		this.add(Box.createVerticalGlue());
 	}
 
@@ -69,6 +78,14 @@ public class RegionPanel extends JPanel implements ActionListener {
 		// 
 		String currRegion = Integer.toString(mWorld.getRegionX()) + "," + Integer.toString(mWorld.getRegionY());
 		regionLabel.setText(currRegion);
+	}
+	
+	public void setSelection(String text) {
+		this.selectionLabel.setMinimumSize(new Dimension(this.getWidth(), selectionLabel.getHeight()));
+		this.selectionLabel.setPreferredSize(new Dimension(this.getWidth(), selectionLabel.getHeight()));
+		this.selectionLabel.setText(text);
+		this.validate();
+		this.repaint();
 	}
 	
 	@Override

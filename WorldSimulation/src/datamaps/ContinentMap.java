@@ -29,7 +29,7 @@ public class ContinentMap {
 	private void mapContinents() {
 		// Get elevation map and ensure it is the same size
 		ElevationMap elevs = mRegion.getElevationMap();
-		if (elevs.getWidth() != w || elevs.getHeight() != h)
+		if (elevs.w != w || elevs.h != h)
 			throw new RuntimeException("Elevation map and continent map are not the same size.");
 		
 		// Create continent map
