@@ -145,8 +145,8 @@ public class AdaptiveMesh {
 	Vector3[] mVertNorms = null;
 	Vector3[] mTriNorms  = null;
 	BoundingBox mBounds  = null;
-	TriangleNormalizer[] mTriNormalizers = null;
-	VertexNormalizer[] mVertNormalizers  = null;
+	//TriangleNormalizer[] mTriNormalizers = null;
+	//VertexNormalizer[] mVertNormalizers  = null;
 	
 	//---Constructors
 	public AdaptiveMesh(Vertex[] verts, int[][] tris) {
@@ -225,15 +225,6 @@ public class AdaptiveMesh {
 	}
 	
 	//---Methods
-	
-	public void runThreads() {
-		/*
-		for (int i = 0; i < mTriNormalizers.length; ++i)
-			mTriNormalizers[i].poke();
-		for (int i = 0; i < mVertNormalizers.length; ++i)
-			mVertNormalizers[i].poke();
-		*/
-	}
 	
 	public void globalUpdate() {
 		// Recalculate all triangle normals

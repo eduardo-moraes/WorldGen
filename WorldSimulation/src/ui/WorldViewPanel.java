@@ -6,10 +6,8 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import utilities.VertexStreamer;
-import utilities.graphics.Camera;
 import world.World;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
@@ -22,7 +20,7 @@ import com.jogamp.opengl.util.FPSAnimator;
 
 import datastructures.geometry.Point;
 import datastructures.geometry.Vector3;
-import datastructures.graphics.Color;
+import datastructures.viewing.Camera;
 
 public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseListener, MouseMotionListener {
 	
@@ -34,18 +32,27 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseLi
 	GLU glu;
 	FPSAnimator animator;
 	int mMode = 0; final int mModes = 2;
-	int cameraMode = 0; final int camModes = 2;
-	double angle = 0;
-	double rot = ROTATION_SPEED;
-	static final double ROTATION_SPEED = 0.75;
+	ProjectionMode mProjectionMode;
+	boolean mIsRotating;
+	double mAngle = 0;
+	double mRotationSpeed = ROTATION_SPEED;
+	static final double ROTATION_SPEED = 1.0;
+	boolean mZoomInDemo;
+	boolean mZoomOutDemo;
+	double mDemoStart;
+	static final double DEMO_TIME = 15.0;
 
 	//---Constructors
 	public WorldViewPanel(World world, WorldView parent, int width, int height) {
 		// 
-		mParent = parent;
-		mWorld = world;
-		mCamera = new Camera(width, height);
+		this.mParent = parent;
+		this.mWorld = world;
+		this.mCamera = new Camera(width, height);
 		this.mVertStream = new VertexStreamer(world, mCamera);
+		this.mProjectionMode = ProjectionMode.ORTHOGRAPHIC;
+		this.mIsRotating = false;
+		this.mZoomInDemo = false;
+		this.mZoomOutDemo = false;
 		
 		// 
 		GLProfile glp = GLProfile.getDefault();
@@ -70,27 +77,52 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseLi
 	
 	public VertexStreamer getVertexStreamer() { return this.mVertStream; }
 	
-	public void changeMode() {
-		// 
-		if (++mMode == mModes) mMode = 0;
+	public void changeProjection(ProjectionMode p) { this.mProjectionMode = p; }
+	
+	public void setRotation(boolean isRotating) { this.mIsRotating = isRotating; }
+	
+	public void startZoomInDemo() {
+		if (mZoomInDemo || mZoomOutDemo) return;
+		mZoomInDemo = true;
+		mZoomOutDemo = false;
+		mVertStream.maxZoomOut();
+		mDemoStart = System.currentTimeMillis() / 1000.0;
 	}
 	
-	public void changeCamera() {
-		if (++cameraMode == camModes) cameraMode = 0;
+	public void startZoomOutDemo() {
+		if (mZoomInDemo || mZoomOutDemo) return;
+		mZoomOutDemo = true;
+		mZoomInDemo = false;
+		mVertStream.maxZoomIn();
+		mDemoStart = System.currentTimeMillis() / 1000.0;
+	}
+	
+	public void stopDemo() {
+		mZoomInDemo = false;
+		mZoomOutDemo = false;
 	}
 	
 	private void update() {
 		// 
-		//mVertStream.zoomIn();
-		mVertStream.globalUpdate();
-		boolean needsRotating = true;
-		if (needsRotating) {
-			angle += rot;
-			if (angle >= 45.0)
-				rot = -ROTATION_SPEED;
-			else if (angle <= -45.0)
-				rot = ROTATION_SPEED;
+		if (mZoomInDemo) {
+			mVertStream.zoomIn();
+			if ((System.currentTimeMillis() / 1000.0) - mDemoStart > DEMO_TIME)
+				mZoomInDemo = false;
 		}
+		else if (mZoomOutDemo) {
+			mVertStream.zoomOut();
+			if ((System.currentTimeMillis() / 1000.0) - mDemoStart > DEMO_TIME)
+				mZoomOutDemo = false;
+		}
+		mVertStream.globalUpdate();
+		
+		// 
+		if (mIsRotating) {
+			mAngle += mRotationSpeed;
+			if (mAngle >= 45.0) mRotationSpeed = -ROTATION_SPEED;
+			else if (mAngle <= -45.0) mRotationSpeed = ROTATION_SPEED;
+		}
+		else mAngle = 0.0;
 	}
 
 	private void render(GLAutoDrawable drawable) {
@@ -99,8 +131,6 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseLi
 
 		// Clear the screen
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
-		
-		double scaleFactor = 0.01;
 		
 		// Switch to model view and push new matrix
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
@@ -118,62 +148,19 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseLi
 				gl.glVertex3f(0, 0, 1);
 			gl.glEnd();
 			*/
-			// DISPLAY MODE 0
-			if (mMode == 0) {
-				//gl.glRotated(angle, 0, 1, 0);
-				//gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
-				mVertStream.display(drawable);
-				//gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
-			}
-			// DISPLAY MODE 1
-			else if (mMode == 1){
-				//
-				//gl.glScaled(scaleFactor, scaleFactor, scaleFactor);
-				//gl.glRotated(45, 0, 0, 1);
-				//gl.glRotated(-45, 1, -1, 0);
-				
-				//gl.glRotated(angle, 1, 1, 1);
-				
-				/*
-				gl.glBegin(GL2.GL_POLYGON);
-				gl.glNormal3d(1, 1, 1);
-				gl.glMaterialfv(gl.GL_FRONT_AND_BACK, gl.GL_DIFFUSE, colorBlue, 0);
-				gl.glVertex3d(-1, -1, 0);
-				gl.glVertex3d(-1, 1, 0);
-				gl.glVertex3d(1, 1, 0);
-				gl.glVertex3d(1, -1, 0);
-				gl.glEnd();
-				*/
-				
-				//gl.glColor3d(1, 0, 0);
-				//gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
-				mWorld.render(drawable, mCamera);
-				//gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
-			}
-			// UNRECOGNIZED DISPLAY MODE
-			else {
-				
-				gl.glMaterialfv(gl.GL_FRONT, gl.GL_AMBIENT_AND_DIFFUSE, Color.get(Color.YELLOW), 0);
-				gl.glBegin(gl.GL_TRIANGLE_FAN);
-					gl.glVertex3f(-0.5f, -0.5f, 0);
-					gl.glVertex3f( 0.5f, -0.5f, 0);
-					gl.glVertex3f(  0,  0.5f, 0);
-				gl.glEnd();
-				
-			}
+			
+			// 
+			gl.glRotated(mAngle, 0, 1, 0);
+			
+			// 
+			//gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+			
+			mVertStream.display(drawable);
+			
+			//gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+			
 		// Pop matrix
 		gl.glPopMatrix();
-		
-
-		//
-		//gl.glMatrixMode(GL2.GL_MODELVIEW);
-		//gl.glPushMatrix();
-		//gl.glLoadIdentity();
-		//gl.glRotated(angle, 0, 1, 0);
-
-		//mWorld.render(drawable);
-
-		//gl.glPopMatrix();
 	}
 
 	private void resetCamera(GL2 gl) {
@@ -189,8 +176,9 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseLi
 		double aspect = mCamera.aspectRatio();
 		double near	  = mCamera.near();
 		double far	  = mCamera.far();
-		// Set up perspective projection matrix
-		if (cameraMode == 1) glu.gluPerspective(fov, aspect, near, far);
+		// Set up projection matrix based on projection mode setting
+		if (mProjectionMode == ProjectionMode.ORTHOGRAPHIC) gl.glOrtho(-1, 1, -1, 1, near, far);
+		else if (mProjectionMode == ProjectionMode.PERSPECTIVE) glu.gluPerspective(fov, aspect, near, far);
 		else gl.glOrtho(-1, 1, -1, 1, near, far);
 		// Define viewing transformation
 		glu.gluLookAt(eye.x, eye.y, eye.z, at.x, at.y, at.z, up.x, up.y, up.z);
@@ -287,7 +275,7 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseLi
 			text = mVertStream.getAreaName(screenX, screenY);
 		}
 		
-		mParent.getRegionPanel().setSelection(text);
+		mParent.changeSelection(text);
 	}
 
 	@Override
@@ -304,7 +292,6 @@ public class WorldViewPanel extends GLJPanel implements GLEventListener, MouseLi
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		// 
-		mParent.getRegionPanel().setSelection("NO SELECTION");
+		mParent.changeSelection("NO SELECTION");
 	}
 }

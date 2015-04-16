@@ -6,17 +6,16 @@ import java.util.Set;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
-import utilities.graphics.Camera;
 import world.World;
 import datamaps.ElevationMap;
 import datastructures.geometry.BoundingBox;
-import datastructures.geometry.Point;
 import datastructures.graphics.AdaptiveMesh;
-import datastructures.graphics.Color;
 import datastructures.graphics.Mesh;
 import datastructures.graphics.Triangle;
 import datastructures.graphics.Vertex;
 import datastructures.graphics.Mesh.MeshMode;
+import datastructures.viewing.Camera;
+import datastructures.viewing.FlatView;
 
 public class VertexStreamer {
 	
@@ -71,10 +70,10 @@ public class VertexStreamer {
 			Vertex vert = mVerts[mCurrent];
 			
 			// Get the vertex position in world space
-			double vertX = vert.x() * mViewHalfWidth + mViewLocation.x;
-			double vertY = vert.y() * mViewHalfHeight + mViewLocation.y;
+			double vertX = vert.x() * mView.xRadius() + mView.x();
+			double vertY = vert.y() * mView.yRadius() + mView.y();
 			// Get the average elevation at this area
-			double vertZ = mWorld.getElevation(vertX, vertY, mDXworld, mDYworld);
+			double vertZ = mWorld.getElevation(vertX, vertY, mDXview, mDYview);
 			// Set the vertex's position to the new elevation level
 			vert.setPosition(vert.x(), vert.y(), vertZ);
 			// Set the color based on the elevation level
@@ -93,19 +92,13 @@ public class VertexStreamer {
 	Vertex[] mVerts;
 	
 	static final double VIEW_SPEED = 10.0;
-	static final double ZOOM_SPEED = 3.0;
-	static final double MAX_ZOOM = 20.0;
-	final double mMinViewWidth, mMaxViewWidth;
-	final double mMinViewHeight, mMaxViewHeight;
-	double mViewHalfWidth, mViewHalfHeight;
-	Point mViewLocation;
-	double mDXworld, mDYworld;
+	static final double ZOOM_SPEED = 0.01;
+	FlatView mView;
+	double mDXview, mDYview;
 	
 	AdaptiveMesh mMesh;
 	boolean mNeedsUpdate;
-	VertexUpdater[] mVertUpdaters;
-	
-	double waterLevel = 0.145;
+	//VertexUpdater[] mVertUpdaters;
 	
 	//---Constructors
 	public VertexStreamer(World world, Camera camera) {
@@ -119,17 +112,10 @@ public class VertexStreamer {
 		this.mDXvert = 2.0 / (double)(mXverts-1);
 		this.mDYvert = 2.0 / (double)(mYverts-1);
 		
-		// Set max/min view width/height using world space size
-		this.mMinViewWidth = MAX_ZOOM;
-		this.mMaxViewWidth = mWorldBounds.xMid;
-		this.mMinViewHeight = MAX_ZOOM;
-		this.mMaxViewHeight = mWorldBounds.yMid;
-		// Set view width, height, and position in world space
-		this.mViewHalfWidth = mMaxViewWidth;
-		this.mViewHalfHeight = mMaxViewHeight;
-		this.mViewLocation = new Point(world.w / 2.0+35, world.h / 2.0-10, camera.position().z);
-		this.mDXworld = mViewHalfWidth*mDXvert;
-		this.mDYworld = mViewHalfHeight*mDYvert;
+		// Create a flat view over the world and store distance between verts in world space
+		this.mView = new FlatView(mWorldBounds);
+		this.mDXview = mView.xRadius()*mDXvert;
+		this.mDYview = mView.yRadius()*mDYvert;
 		
 		// Determine number of vertices and triangles needed
 		int vertCount = mXverts*mYverts;
@@ -197,51 +183,60 @@ public class VertexStreamer {
 
 	//---Methods
 	
-	private void runThreads() {
-		/*
-		for (int i = 0; i < mVertUpdaters.length; ++i)
-			mVertUpdaters[i].poke();
-		mMesh.runThreads();
-		*/
-	}
-	
 	public String getAreaName(double x, double y) {
 		if (x < -1 || x > 1 || y < -1 || y > 1) return "OUT OF BOUNDS";
 		
-		double worldX = x*mViewHalfWidth + mViewLocation.x;
-		double worldY = y*mViewHalfHeight + mViewLocation.y;
+		double worldX = x*mView.xRadius() + mView.x();
+		double worldY = y*mView.yRadius() + mView.y();
 		
-		return mWorld.getAreaName(worldX, worldY, mDXworld, mDYworld);
+		return mWorld.getAreaName(worldX, worldY, mDXview, mDYview);
 	}
 	
-	public void viewLeft() { moveView(-VIEW_SPEED, 0); }
+	public void viewLeft() {
+		this.mView.moveView(-VIEW_SPEED, 0);
+		this.mNeedsUpdate = true;
+	}
 	
-	public void viewRight() { moveView(VIEW_SPEED, 0); }
+	public void viewRight() {
+		this.mView.moveView(VIEW_SPEED, 0);
+		this.mNeedsUpdate = true;
+	}
 	
-	public void viewUp() { moveView(0, VIEW_SPEED); }
+	public void viewUp() {
+		this.mView.moveView(0, VIEW_SPEED);
+		this.mNeedsUpdate = true;
+	}
 	
-	public void viewDown() { moveView(0, -VIEW_SPEED); }
+	public void viewDown() {
+		this.mView.moveView(0, -VIEW_SPEED);
+		this.mNeedsUpdate = true;
+	}
 	
 	public void zoomIn() {
-		this.mViewHalfWidth = Utilities.clamp(mViewHalfWidth-ZOOM_SPEED, mMinViewWidth, mMaxViewWidth);
-		this.mViewHalfHeight = Utilities.clamp(mViewHalfHeight-ZOOM_SPEED, mMinViewHeight, mMaxViewHeight);
-		this.mDXworld = mViewHalfWidth*mDXvert;
-		this.mDYworld = mViewHalfHeight*mDYvert;
+		this.mView.zoomView(-ZOOM_SPEED);
+		this.mDXview = mView.xRadius()*mDXvert;
+		this.mDYview = mView.yRadius()*mDYvert;
 		this.mNeedsUpdate = true;
 	}
 	
 	public void zoomOut() {
-		this.mViewHalfWidth = Utilities.clamp(mViewHalfWidth+ZOOM_SPEED, mMinViewWidth, mMaxViewWidth);
-		this.mViewHalfHeight = Utilities.clamp(mViewHalfHeight+ZOOM_SPEED, mMinViewHeight, mMaxViewHeight);
-		this.mDXworld = mViewHalfWidth*mDXvert;
-		this.mDYworld = mViewHalfHeight*mDYvert;
+		this.mView.zoomView(ZOOM_SPEED);
+		this.mDXview = mView.xRadius()*mDXvert;
+		this.mDYview = mView.yRadius()*mDYvert;
 		this.mNeedsUpdate = true;
 	}
 	
-	private void moveView(double dx, double dy) {
-		double newX = Utilities.wrap(mViewLocation.x+dx, mWorld.w);
-		double newY = Utilities.wrap(mViewLocation.y+dy, mWorld.h);
-		this.mViewLocation = new Point(newX, newY, mViewLocation.z);
+	public void maxZoomIn() {
+		this.mView.zoomView(-2.0);
+		this.mDXview = mView.xRadius()*mDXvert;
+		this.mDYview = mView.yRadius()*mDYvert;
+		this.mNeedsUpdate = true;
+	}
+	
+	public void maxZoomOut() {
+		this.mView.zoomView(2.0);
+		this.mDXview = mView.xRadius()*mDXvert;
+		this.mDYview = mView.yRadius()*mDYvert;
 		this.mNeedsUpdate = true;
 	}
 	
@@ -256,10 +251,10 @@ public class VertexStreamer {
 			// Get the vertex that will be updated
 			Vertex vert = mVerts[v];
 			// Get the vertex position in world space
-			double vertX = vert.x()*mViewHalfWidth + mViewLocation.x;
-			double vertY = vert.y()*mViewHalfHeight + mViewLocation.y;
+			double vertX = vert.x()*mView.xRadius() + mView.x();
+			double vertY = vert.y()*mView.yRadius() + mView.y();
 			// Get the average elevation at this area
-			double vertZ = mWorld.getElevation(vertX, vertY, mDXworld, mDYworld);
+			double vertZ = mWorld.getElevation(vertX, vertY, mDXview, mDYview);
 			// Set the vertex's position to the new elevation level
 			vert.setPosition(vert.x(), vert.y(), vertZ);
 			// Set the color based on the elevation level

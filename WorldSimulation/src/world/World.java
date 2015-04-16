@@ -11,13 +11,13 @@ import javax.imageio.ImageIO;
 import proceduralgeneration.ElevationMapGenerator;
 import utilities.Utilities;
 import utilities.VertexStreamer;
-import utilities.graphics.Camera;
 
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import datamaps.ElevationMap;
 import datastructures.graphics.Mesh;
+import datastructures.viewing.Camera;
 
 public class World {
 	
