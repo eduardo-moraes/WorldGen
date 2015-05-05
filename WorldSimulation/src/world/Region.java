@@ -5,10 +5,10 @@ import java.util.Set;
 
 import proceduralgeneration.ElevationMapGenerator;
 import utilities.Utilities;
-import utilities.graphics.Mesh;
-import utilities.graphics.Triangle;
-import utilities.graphics.Vertex;
 import datamaps.ElevationMap;
+import datastructures.graphics.Mesh;
+import datastructures.graphics.Triangle;
+import datastructures.graphics.Vertex;
 
 public class Region {
 
@@ -21,7 +21,7 @@ public class Region {
 	// ---Constructors
 	public Region(ElevationMap map) {
 		this.mElevMap = map;
-		this.mMesh = map.toMesh(map.getWidth(), map.getHeight());
+		this.mMesh = map.toMesh(map.w, map.h);
 		this.neighbors = new Region[3][3];
 		this.neighbors[1][1] = this;
 	}
@@ -43,8 +43,8 @@ public class Region {
 	public Mesh getMesh() { return this.mMesh; }
 	
 	public void resetMesh() {
-		int w = mElevMap.getWidth();
-		int h = mElevMap.getHeight();
+		int w = mElevMap.w;
+		int h = mElevMap.h;
 		double realWidth = w;
 		double realHeight = h;
 		
@@ -75,35 +75,35 @@ public class Region {
 				// Copy local height values of 2x2 grid centered on current vertex
 				if (x == 0) {
 					if (y == 0) {
-						localHeights[0][0] = neighbors[0][0].getElevationMap().getElev(neighbors[0][0].getElevationMap().getWidth()-1, neighbors[0][0].getElevationMap().getHeight()-1); // UPPER-LEFT
-						localHeights[0][1] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().getWidth()-1, y); // LOWER-LEFT
-						localHeights[1][0] = neighbors[1][0].getElevationMap().getElev(x, neighbors[1][0].getElevationMap().getHeight()-1); // UPPER-RIGHT
+						localHeights[0][0] = neighbors[0][0].getElevationMap().getElev(neighbors[0][0].getElevationMap().w-1, neighbors[0][0].getElevationMap().h-1); // UPPER-LEFT
+						localHeights[0][1] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().w-1, y); // LOWER-LEFT
+						localHeights[1][0] = neighbors[1][0].getElevationMap().getElev(x, neighbors[1][0].getElevationMap().h-1); // UPPER-RIGHT
 						localHeights[1][1] = mElevMap.getElev(x, y); // LOWER-RIGHT
 					}
 					else if (y == h) {
-						localHeights[0][0] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().getWidth()-1, y-1); // UPPER-LEFT
-						localHeights[0][1] = neighbors[0][2].getElevationMap().getElev(neighbors[0][2].getElevationMap().getWidth()-1, 0); // LOWER-LEFT
+						localHeights[0][0] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().w-1, y-1); // UPPER-LEFT
+						localHeights[0][1] = neighbors[0][2].getElevationMap().getElev(neighbors[0][2].getElevationMap().w-1, 0); // LOWER-LEFT
 						localHeights[1][0] = mElevMap.getElev(x, y);  // UPPER-RIGHT
 						localHeights[1][1] = neighbors[1][2].getElevationMap().getElev(x, 0); // LOWER-RIGHT
 					}
 					else {
-						localHeights[0][0] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().getWidth()-1, y-1); // UPPER-LEFT
-						localHeights[0][1] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().getWidth()-1, y); // LOWER-LEFT
+						localHeights[0][0] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().w-1, y-1); // UPPER-LEFT
+						localHeights[0][1] = neighbors[0][1].getElevationMap().getElev(neighbors[0][1].getElevationMap().w-1, y); // LOWER-LEFT
 						localHeights[1][0] = mElevMap.getElev(x, y-1); // UPPER-RIGHT
 						localHeights[1][1] = mElevMap.getElev(x, y); // LOWER-RIGHT
 					}
 				}
 				else if (x == w) {
 					if (y == 0) {
-						localHeights[0][0] = neighbors[1][0].getElevationMap().getElev(x-1, neighbors[1][0].getElevationMap().getHeight()-1); // UPPER-LEFT
+						localHeights[0][0] = neighbors[1][0].getElevationMap().getElev(x-1, neighbors[1][0].getElevationMap().h-1); // UPPER-LEFT
 						localHeights[0][1] = mElevMap.getElev(x-1, y); // LOWER-LEFT
-						localHeights[1][0] = neighbors[2][0].getElevationMap().getElev(0, neighbors[2][0].getElevationMap().getHeight()-1); // UPPER-RIGHT
+						localHeights[1][0] = neighbors[2][0].getElevationMap().getElev(0, neighbors[2][0].getElevationMap().h-1); // UPPER-RIGHT
 						localHeights[1][1] = neighbors[2][1].getElevationMap().getElev(0, y); // LOWER-RIGHT
 					}
 					else if (y == h) {
 						localHeights[0][0] = mElevMap.getElev(x-1, y-1); // UPPER-LEFT
-						localHeights[0][1] = neighbors[1][2].getElevationMap().getElev(neighbors[1][2].getElevationMap().getWidth()-1, 0); // LOWER-LEFT
-						localHeights[1][0] = neighbors[2][1].getElevationMap().getElev(0, neighbors[2][1].getElevationMap().getHeight()-1); // UPPER-RIGHT
+						localHeights[0][1] = neighbors[1][2].getElevationMap().getElev(neighbors[1][2].getElevationMap().w-1, 0); // LOWER-LEFT
+						localHeights[1][0] = neighbors[2][1].getElevationMap().getElev(0, neighbors[2][1].getElevationMap().h-1); // UPPER-RIGHT
 						localHeights[1][1] = neighbors[2][2].getElevationMap().getElev(0, 0); // LOWER-RIGHT
 					}
 					else {
@@ -115,9 +115,9 @@ public class Region {
 				}
 				else {
 					if (y == 0) {
-						localHeights[0][0] = neighbors[1][0].getElevationMap().getElev(x-1, neighbors[1][0].getElevationMap().getHeight()-1); // UPPER-LEFT
+						localHeights[0][0] = neighbors[1][0].getElevationMap().getElev(x-1, neighbors[1][0].getElevationMap().h-1); // UPPER-LEFT
 						localHeights[0][1] = mElevMap.getElev(x-1, y); // LOWER-LEFT
-						localHeights[1][0] = neighbors[1][0].getElevationMap().getElev(x, neighbors[1][0].getElevationMap().getHeight()-1); // UPPER-RIGHT
+						localHeights[1][0] = neighbors[1][0].getElevationMap().getElev(x, neighbors[1][0].getElevationMap().h-1); // UPPER-RIGHT
 						localHeights[1][1] = mElevMap.getElev(x, y); // LOWER-RIGHT
 					}
 					else if (y == h) {
@@ -182,8 +182,8 @@ public class Region {
 	//---Static Methods
 	
 	public static Region[][] splitMap(ElevationMap map) {
-		int width = map.getWidth();
-		int height = map.getHeight();
+		int width = map.w;
+		int height = map.h;
 		
 		int regionSize = 10;
 		int xRegions = width / regionSize;

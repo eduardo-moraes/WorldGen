@@ -1,9 +1,9 @@
-package utilities.geometry;
+package datastructures.geometry;
 
 public class Point {
 
 	//---Object Data
-	double x, y, z;
+	public final double x, y, z;
 	
 	//---Constructors
 	public Point() {
@@ -21,12 +21,6 @@ public class Point {
 	}
 
 	// ---Methods
-
-	public double getX() { return this.x; }
-
-	public double getY() { return this.y; }
-
-	public double getZ() { return this.z; }
 
 	@Override
 	public boolean equals(Object o) {

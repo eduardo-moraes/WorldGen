@@ -1,38 +1,53 @@
-package utilities.graphics;
+package datastructures.graphics;
 
-import utilities.arrays.Vector3;
-import utilities.geometry.Point;
+import datastructures.geometry.Point;
+import datastructures.geometry.Vector3;
 
 public class Vertex {
 	
 	//---Object Data
 	Point mPosition;
-	//double x, y, z;
 	Vector3 mNormal;
+	float[] mColor;
 	
 	//---Constructors
 	public Vertex() {
-		this(0, 0, 0);
+		this(0, 0, 0, new float[] {1f,1f,1f});
 	}
 	
 	public Vertex(double x, double y, double z) {
+		this(x, y, z, new float[] {1f,1f,1f});
+	}
+	
+	public Vertex(double x, double y, double z, float[] color) {
 		this.mPosition = new Point(x, y, z);
-		this.mNormal = new Vector3();
+		this.mNormal = new Vector3(0,0,1);
+		this.mColor = color;
 	}
 	
 	//---Methods
 	
-	public double getX() { return this.mPosition.getX(); }
+	public double x() { return this.mPosition.x; }
 	
-	public double getY() { return this.mPosition.getY(); }
+	public double y() { return this.mPosition.y; }
 	
-	public double getZ() { return this.mPosition.getZ(); }
+	public double z() { return this.mPosition.z; }
 	
-	public Point getPosition() { return this.mPosition; }
+	public Point position() { return this.mPosition; }
+	
+	public void setPosition(double x, double y, double z) {
+		this.mPosition = new Point(x, y, z);
+	}
+	
+	public float[] color() { return this.mColor; }
+	
+	public void setColor(float[] color) {
+		this.mColor = color;
+	}
+	
+	public Vector3 normal() { return this.mNormal; }
 	
 	public void setNormal(Vector3 normal) { this.mNormal = normal; }
-	
-	public Vector3 getNormal() { return this.mNormal; }
 	
 	@Override
 	public boolean equals(Object o) {

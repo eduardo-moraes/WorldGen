@@ -167,7 +167,7 @@ public class ElevationMapGenerator {
 		// 
 		if (seed == null || iterations < 0) return seed;
 		// 
-		if (seed.getWidth() != seed.getHeight()) return seed;
+		if (seed.w != seed.h) return seed;
 		
 		// 
 		ElevationMap map = null;
@@ -175,12 +175,12 @@ public class ElevationMapGenerator {
 		//
 		for (int i = 0; i < iterations; ++i) {
 			// 
-			int newSize = (seed.getWidth()-1) * 2;
+			int newSize = (seed.w-1) * 2;
 			map = new ElevationMap(newSize, newSize);
 			
 			// For each point in the seed
-			for (int x = 0; x < seed.getWidth()-1; ++x) {
-				for (int y = 0; y < seed.getHeight()-1; ++y) {
+			for (int x = 0; x < seed.w-1; ++x) {
+				for (int y = 0; y < seed.h-1; ++y) {
 					// Get heights at corners of square that this point occupies on the top-left
 					double topLeft     = seed.getElev(x  , y  );
 					double topRight    = seed.getElev(x+1, y  );
@@ -219,10 +219,10 @@ public class ElevationMapGenerator {
 		if (map == null || filterSize < 1 || filterSize % 2 != 1) return;
 		
 		// Create array for convolution
-		double[][] temp = new double[map.getWidth()][map.getHeight()];
+		double[][] temp = new double[map.w][map.h];
 		// Copy elevation values to the array
-		for (int x = 0; x < map.getWidth(); ++x)
-			for (int y = 0; y < map.getHeight(); ++y)
+		for (int x = 0; x < map.w; ++x)
+			for (int y = 0; y < map.h; ++y)
 				temp[x][y] = map.getElev(x, y);
 		
 		// 
@@ -244,8 +244,8 @@ public class ElevationMapGenerator {
 		else return;
 		
 		// Copy elevation values back to the map
-		for (int x = 0; x < map.getWidth(); ++x)
-			for (int y = 0; y < map.getHeight(); ++y)
+		for (int x = 0; x < map.w; ++x)
+			for (int y = 0; y < map.h; ++y)
 				map.setElev(temp[x][y], x, y);
 	}
 }
