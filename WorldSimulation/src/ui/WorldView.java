@@ -120,10 +120,12 @@ public class WorldView implements ActionListener {
 			mCamera.moveLeft();
 		// 
 		else if ("cameraUp".equals(e.getActionCommand()))
-			mCamera.moveUp();
+			//mCamera.moveUp();
+			mWorld.smoothMap();
 		// 
 		else if ("cameraDown".equals(e.getActionCommand()))
-			mCamera.moveDown();
+			//mCamera.moveDown();
+			mWorld.sharpenMap();
 		// 
 		else if ("cameraRight".equals(e.getActionCommand()))
 			mCamera.moveRight();

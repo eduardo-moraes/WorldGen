@@ -18,6 +18,7 @@ public class World {
 	//---Object Data
 	double w, h;
 	int mMode = 0;
+	double resolution = 200;
 	
 	ElevationMap temp;
 	Mesh mMesh;
@@ -43,7 +44,7 @@ public class World {
 		createNew();
 		//this.mRegions = Region.splitMap(temp);
 		//swapRegion();
-		this.mMesh = VertexStreamer.buildMeshTest(temp, 10, 10);
+		this.mMesh = VertexStreamer.buildMeshMin(temp, resolution, resolution);
 		/*
 		this.mMesh = mRegions[xSelect][ySelect].getMesh();
 		this.mMesh = temp.toMesh(temp.getWidth(), temp.getHeight());
@@ -106,7 +107,8 @@ public class World {
 	}
 	
 	public void smoothMap() {
-		this.mMesh = VertexStreamer.buildMesh(temp, 50, 50);
+		resolution *= 2;
+		this.mMesh = VertexStreamer.buildMeshMin(temp, resolution, resolution);
 		/*
 		ElevationMapGenerator.filter(mRegions[xSelect][ySelect].mElevMap, 3, 0);
 		mRegions[xSelect][ySelect].resetMesh();
@@ -115,7 +117,8 @@ public class World {
 	}
 	
 	public void sharpenMap() {
-		this.mMesh = VertexStreamer.buildMesh(temp, 100, 100);
+		resolution /= 2;
+		this.mMesh = VertexStreamer.buildMeshMin(temp, resolution, resolution);
 		/*
 		ElevationMapGenerator.filter(mRegions[xSelect][ySelect].mElevMap, 3, 1);
 		mRegions[xSelect][ySelect].resetMesh();
@@ -140,6 +143,8 @@ public class World {
 		// 
 		Transform relativeLocation = new Transform(mLocation, camera.position());
 		
+		double scaleFactor = 1/resolution;
+		gl.glScaled(scaleFactor, scaleFactor, scaleFactor);
 		this.mMesh.render(drawable, relativeLocation);
 		
 		/*
